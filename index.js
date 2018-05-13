@@ -1,0 +1,41 @@
+'use strict'
+
+const getTokens = require('hanzi-tokenizer')
+
+const processToken = (token, segmented) => {
+	if (segmented) {
+		return Object.values(token.definitions).map(v => v.zhuyin.replace(/\s/, ''))
+	} else {
+		return Object.values(token.definitions).map(v => v.zhuyin)
+	}
+}
+
+const convert = async (text, opts = {}) => {
+	const tokens = await getTokens(text, Object.assign(opts, { spaces: true }))
+	const list = []
+	for (let i = 0; i < tokens.length; i++) {
+		if (typeof tokens[i] === 'string') {
+			if (typeof list[list.length - 1] === 'string') {
+				list[list.length - 1] += tokens[i]
+			} else {
+				list.push(tokens[i])
+			}
+		} else {
+			if (Object.keys(tokens[i].definitions).length === 1) {
+				if (typeof list[list.length - 1] === 'string') {
+					list[list.length - 1] += processToken(tokens[i], opts.segmented)[0]
+				} else {
+					list.push(processToken(tokens[i], opts.segmented)[0])
+				}
+			} else {
+				list.push(processToken(tokens[i], opts.segmented))
+			}
+		}
+	}
+	return list
+}
+
+module.exports = convert
+
+convert('我的猫喜欢吃苹果')
+.then(console.log)
