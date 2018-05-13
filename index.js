@@ -36,6 +36,3 @@ const convert = async (text, opts = {}) => {
 }
 
 module.exports = convert
-
-convert('我的猫喜欢吃苹果')
-.then(console.log)
